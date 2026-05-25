@@ -39,3 +39,4 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+NEXT_PUBLIC_API_URL=https://amazon-harvest-backend.onrender.com
