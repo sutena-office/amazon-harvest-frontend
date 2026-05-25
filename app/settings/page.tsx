@@ -15,6 +15,7 @@ export default function SettingsPage() {
     max_rank: 100000,
     amazon_fee_rate: 15.4,
     line_user_id: "",
+    discord_webhook_url: "",
     notify_enabled: false,
   });
 
@@ -30,6 +31,7 @@ export default function SettingsPage() {
           max_rank: d.max_rank ?? 100000,
           amazon_fee_rate: d.amazon_fee_rate ?? 15.4,
           line_user_id: d.line_user_id || "",
+          discord_webhook_url: d.discord_webhook_url || "",
           notify_enabled: d.notify_enabled ?? false,
         });
       })
@@ -107,11 +109,31 @@ export default function SettingsPage() {
             </div>
 
             <div className="border-t border-gray-700 pt-4">
-              <label className="block text-sm font-semibold text-gray-200 mb-1">LINE ユーザーID（通知先）</label>
-              <input type="text" value={form.line_user_id}
-                onChange={(e) => setForm({ ...form, line_user_id: e.target.value })}
-                className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
-                placeholder="Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+              <p className="text-xs font-bold text-orange-400 uppercase tracking-wide mb-3">通知設定</p>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-200 mb-1">
+                    Discord Webhook URL
+                  </label>
+                  <input type="url" value={form.discord_webhook_url}
+                    onChange={(e) => setForm({ ...form, discord_webhook_url: e.target.value })}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    placeholder="https://discord.com/api/webhooks/..." />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Discordのサーバー設定 → 連携サービス → ウェブフックからURLを取得
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-gray-200 mb-1">LINE ユーザーID（通知先）</label>
+                  <input type="text" value={form.line_user_id}
+                    onChange={(e) => setForm({ ...form, line_user_id: e.target.value })}
+                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+                    placeholder="Uxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx" />
+                  <p className="text-xs text-gray-500 mt-1">LINE Developers コンソールまたはLINE Botで取得</p>
+                </div>
+              </div>
             </div>
 
             <div className="flex items-center gap-3">
@@ -119,7 +141,7 @@ export default function SettingsPage() {
                 onChange={(e) => setForm({ ...form, notify_enabled: e.target.checked })}
                 className="w-4 h-4 accent-orange-500" />
               <label htmlFor="notify" className="text-sm font-medium text-gray-200">
-                刈り取り候補が見つかったらLINEで即時通知する
+                刈り取り候補が見つかったらDiscord・LINEで即時通知する
               </label>
             </div>
 
