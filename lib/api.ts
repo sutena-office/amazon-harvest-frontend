@@ -27,7 +27,7 @@ export function logout() {
 
 export async function getDeals() {
   const res = await fetch(`${BASE_URL}/api/deals/`, { headers: authHeaders() });
-  if (!res.ok) throw new Error("取得失敗");
+  if (!res.ok) throw new Error(`${res.status}`);
   return res.json();
 }
 

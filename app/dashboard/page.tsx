@@ -34,7 +34,12 @@ export default function DashboardPage() {
     setLoading(true);
     getDeals()
       .then(setDeals)
-      .catch(() => router.replace("/login"))
+      .catch((e) => {
+        const msg = e?.message || "";
+        if (msg.includes("401") || msg.includes("認証")) {
+          router.replace("/login");
+        }
+      })
       .finally(() => setLoading(false));
   };
 
