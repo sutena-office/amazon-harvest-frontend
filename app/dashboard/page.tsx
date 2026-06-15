@@ -68,35 +68,35 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <header className="bg-gray-800 border-b border-gray-700 px-6 py-4 flex justify-between items-center">
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+      <header className="bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center shadow-sm">
         <div className="flex items-center gap-2">
           <span className="text-xl">🔥</span>
-          <h1 className="text-lg font-bold text-orange-400">Amazon刈り取りモニター</h1>
+          <h1 className="text-lg font-bold text-orange-500">Amazon刈り取りモニター</h1>
         </div>
         <div className="flex gap-3 items-center">
-          <button onClick={() => router.push("/settings")} className="text-sm text-gray-400 hover:text-white">設定</button>
-          <button onClick={() => { logout(); router.replace("/login"); }} className="text-sm text-red-400 hover:text-red-300">ログアウト</button>
+          <button onClick={() => router.push("/settings")} className="text-sm text-gray-500 hover:text-gray-900">設定</button>
+          <button onClick={() => { logout(); router.replace("/login"); }} className="text-sm text-red-500 hover:text-red-400">ログアウト</button>
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-4 py-6">
         <div className="flex justify-between items-center mb-4">
           <div>
-            <h2 className="text-xl font-bold">刈り取り候補一覧</h2>
-            <p className="text-sm text-gray-400 mt-0.5">30分ごとに自動スキャン。即時購入で利益確定。</p>
+            <h2 className="text-xl font-bold text-gray-900">刈り取り候補一覧</h2>
+            <p className="text-sm text-gray-500 mt-0.5">30分ごとに自動スキャン。即時購入で利益確定。</p>
           </div>
           <div className="flex gap-2">
             <button
               onClick={fetchDeals}
-              className="px-3 py-2 bg-gray-700 hover:bg-gray-600 text-sm rounded-lg transition"
+              className="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-100 text-gray-700 text-sm rounded-lg transition"
             >
               🔄 更新
             </button>
             <button
               onClick={handleRun}
               disabled={running}
-              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-sm font-semibold rounded-lg disabled:opacity-50 transition"
+              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm font-semibold rounded-lg disabled:opacity-50 transition"
             >
               {running ? "スキャン中..." : "⚡ 今すぐスキャン"}
             </button>
@@ -104,57 +104,57 @@ export default function DashboardPage() {
         </div>
 
         {message && (
-          <div className="mb-4 bg-blue-900 border border-blue-700 text-blue-200 text-sm px-4 py-2 rounded-lg">
+          <div className="mb-4 bg-blue-50 border border-blue-200 text-blue-700 text-sm px-4 py-2 rounded-lg">
             {message}
           </div>
         )}
 
         {loading ? (
-          <p className="text-gray-400 text-center py-12">読み込み中...</p>
+          <p className="text-gray-500 text-center py-12">読み込み中...</p>
         ) : deals.length === 0 ? (
-          <div className="bg-gray-800 rounded-xl p-10 text-center">
+          <div className="bg-white rounded-xl border border-gray-200 p-10 text-center">
             <p className="text-4xl mb-3">📭</p>
-            <p className="text-gray-300 font-medium">現在、刈り取り候補はありません</p>
+            <p className="text-gray-700 font-medium">現在、刈り取り候補はありません</p>
             <p className="text-sm text-gray-500 mt-2">「今すぐスキャン」を押すか、30分ごとに自動検索されます</p>
           </div>
         ) : (
           <div className="space-y-3">
             {deals.map((d) => (
-              <div key={d.id} className="bg-gray-800 rounded-xl border border-gray-700 p-4 hover:border-orange-500 transition">
+              <div key={d.id} className="bg-white rounded-xl border border-gray-200 p-4 hover:border-orange-400 transition shadow-sm">
                 <div className="flex justify-between items-start gap-3">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white text-sm leading-snug">{d.product_name}</h3>
+                    <h3 className="font-semibold text-gray-900 text-sm leading-snug">{d.product_name}</h3>
                     <p className="text-xs text-gray-500 mt-0.5">{formatTime(d.found_at)} 発見　ランク {d.amazon_rank.toLocaleString()}位</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
-                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${d.profit_rate >= 20 ? "bg-green-900 text-green-300" : "bg-yellow-900 text-yellow-300"}`}>
+                    <span className={`text-xs font-bold px-2 py-1 rounded-full ${d.profit_rate >= 20 ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"}`}>
                       利益率 {d.profit_rate}%
                     </span>
-                    <span className="text-xs font-bold px-2 py-1 rounded-full bg-red-900 text-red-300">
+                    <span className="text-xs font-bold px-2 py-1 rounded-full bg-red-100 text-red-700">
                       📉 {d.price_drop_rate}%OFF
                     </span>
                   </div>
                 </div>
 
                 <div className="mt-3 grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-                  <div className="bg-gray-750 rounded-lg p-2">
-                    <p className="text-gray-400 text-xs font-medium">🛒 仕入れ値（現在価格）</p>
-                    <p className="font-bold text-orange-300 text-base">¥{d.current_price.toLocaleString()}</p>
+                  <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+                    <p className="text-gray-500 text-xs font-medium">🛒 仕入れ値（現在価格）</p>
+                    <p className="font-bold text-orange-500 text-base">¥{d.current_price.toLocaleString()}</p>
                   </div>
-                  <div className="bg-gray-750 rounded-lg p-2">
-                    <p className="text-gray-400 text-xs font-medium">💰 転売価格（通常価格）</p>
-                    <p className="font-bold text-white text-base">¥{d.regular_price.toLocaleString()}</p>
+                  <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+                    <p className="text-gray-500 text-xs font-medium">💰 転売価格（通常価格）</p>
+                    <p className="font-bold text-gray-900 text-base">¥{d.regular_price.toLocaleString()}</p>
                     <p className="text-xs text-gray-500">手数料 {d.amazon_fee_rate ?? 15.4}%</p>
                   </div>
-                  <div className="bg-gray-750 rounded-lg p-2">
-                    <p className="text-gray-400 text-xs font-medium">📈 予想利益額</p>
-                    <p className={`font-bold text-base ${d.profit_amount > 0 ? "text-green-400" : "text-red-400"}`}>
+                  <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+                    <p className="text-gray-500 text-xs font-medium">📈 予想利益額</p>
+                    <p className={`font-bold text-base ${d.profit_amount > 0 ? "text-green-600" : "text-red-600"}`}>
                       ¥{d.profit_amount.toLocaleString()}
                     </p>
                   </div>
-                  <div className="bg-gray-750 rounded-lg p-2">
-                    <p className="text-gray-400 text-xs font-medium">📉 値下がり幅</p>
-                    <p className="font-bold text-red-300 text-base">
+                  <div className="bg-gray-50 rounded-lg p-2 border border-gray-100">
+                    <p className="text-gray-500 text-xs font-medium">📉 値下がり幅</p>
+                    <p className="font-bold text-red-600 text-base">
                       ¥{(d.regular_price - d.current_price).toLocaleString()}
                     </p>
                   </div>
@@ -173,13 +173,13 @@ export default function DashboardPage() {
                     href={`https://keepa.com/#!product/5-${d.amazon_asin}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-blue-400 hover:underline"
+                    className="text-xs text-blue-600 hover:underline"
                   >
                     Keepaで価格推移を確認
                   </a>
                   <button
                     onClick={() => handleDelete(d.id)}
-                    className="ml-auto text-xs text-gray-600 hover:text-red-400 transition"
+                    className="ml-auto text-xs text-gray-400 hover:text-red-500 transition"
                   >
                     削除
                   </button>

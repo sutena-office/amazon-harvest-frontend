@@ -26,34 +26,34 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-      <div className="bg-gray-800 rounded-xl shadow-lg p-8 w-full max-w-sm">
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="bg-white rounded-xl shadow-lg border border-gray-200 p-8 w-full max-w-sm">
         <div className="text-center mb-6">
-          <p className="text-2xl font-bold text-orange-400">🔥 Amazon刈り取り</p>
-          <p className="text-sm text-gray-400 mt-1">価格下落を即時検知・通知</p>
+          <p className="text-2xl font-bold text-orange-500">🔥 Amazon刈り取り</p>
+          <p className="text-sm text-gray-500 mt-1">価格下落を即時検知・通知</p>
         </div>
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">メールアドレス</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">メールアドレス</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-400"
               required
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">パスワード</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">パスワード</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full border border-gray-600 rounded-lg px-3 py-2 text-sm bg-gray-700 text-white focus:outline-none focus:ring-2 focus:ring-orange-400"
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-400"
               required
             />
           </div>
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && <p className="text-sm text-red-500">{error}</p>}
           <button
             type="submit"
             disabled={loading}
