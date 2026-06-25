@@ -12,6 +12,7 @@ export default function SettingsPage() {
     min_profit_rate: 15,
     min_profit_amount: 500,
     min_drop_rate: 20,
+    min_rank: 1,
     max_rank: 100000,
     amazon_fee_rate: 15.4,
     line_user_id: "",
@@ -28,6 +29,7 @@ export default function SettingsPage() {
           min_profit_rate: d.min_profit_rate ?? 15,
           min_profit_amount: d.min_profit_amount ?? 500,
           min_drop_rate: d.min_drop_rate ?? 20,
+          min_rank: d.min_rank ?? 1,
           max_rank: d.max_rank ?? 100000,
           amazon_fee_rate: d.amazon_fee_rate ?? 15.4,
           line_user_id: d.line_user_id || "",
@@ -92,12 +94,20 @@ export default function SettingsPage() {
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">最大ランキング（売れ筋フィルター）</label>
-              <input type="number" value={form.max_rank}
-                onChange={(e) => setForm({ ...form, max_rank: Number(e.target.value) })}
-                className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-400"
-                min={1000} step={10000} />
-              <p className="text-xs text-gray-500 mt-1">この順位以内の商品のみ対象（例: 100000 = 売れ筋10万位以内）</p>
+              <label className="block text-sm font-semibold text-gray-700 mb-1">対象ランキング範囲</label>
+              <div className="flex items-center gap-2">
+                <input type="number" value={form.min_rank}
+                  onChange={(e) => setForm({ ...form, min_rank: Number(e.target.value) })}
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  min={1} step={1} placeholder="1" />
+                <span className="text-gray-500 text-sm shrink-0">位 〜</span>
+                <input type="number" value={form.max_rank}
+                  onChange={(e) => setForm({ ...form, max_rank: Number(e.target.value) })}
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  min={1} step={1000} />
+                <span className="text-gray-500 text-sm shrink-0">位</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">例: 1位〜11000位（この範囲内の売れ筋商品のみ対象）</p>
             </div>
 
             <div>
