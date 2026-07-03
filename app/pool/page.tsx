@@ -37,13 +37,17 @@ export default function PoolPage() {
         setApprovedCount(d.approved_count);
       })
       .catch((e) => {
-        const msg = e?.message || "";
+        const msg = e?.message || "unknown";
         if (msg.includes("401")) {
           setMessage("ログインの有効期限が切れました。再ログインしてください。");
           router.replace("/login");
+        } else {
+          setMessage(`ステータス取得エラー(${msg})`);
         }
       });
-    getPoolList().then(setWatchList).catch(() => {});
+    getPoolList()
+      .then(setWatchList)
+      .catch((e) => setMessage((prev) => prev || `リスト取得エラー(${e?.message || "unknown"})`));
   }, [router]);
 
   useEffect(() => {
