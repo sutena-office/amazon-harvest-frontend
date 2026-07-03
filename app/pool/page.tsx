@@ -2,7 +2,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  getPoolCategories, previewPool, buildPool, importPoolCsv, getPoolStatus, getPoolList,
+  getPoolCategories, previewPool, buildPool, importPoolCsv, getPoolStatus, getPoolList, registerTrackers,
 } from "@/lib/api";
 
 type Category = { id: number; name: string };
@@ -24,6 +24,8 @@ export default function PoolPage() {
   const [message, setMessage] = useState("");
   const [job, setJob] = useState<Job | null>(null);
   const [trackingCount, setTrackingCount] = useState(0);
+  const [approvedCount, setApprovedCount] = useState(0);
+  const [registering, setRegistering] = useState(false);
   const [watchList, setWatchList] = useState<WatchItem[]>([]);
   const [csvText, setCsvText] = useState("");
 
@@ -32,6 +34,7 @@ export default function PoolPage() {
       .then((d) => {
         setJob(d.job);
         setTrackingCount(d.tracking_count + d.approved_count);
+        setApprovedCount(d.approved_count);
       })
       .catch(() => {});
     getPoolList().then(setWatchList).catch(() => {});
@@ -89,6 +92,20 @@ export default function PoolPage() {
     }
   };
 
+  const handleRegister = async () => {
+    setRegistering(true);
+    setMessage("");
+    try {
+      const d = await registerTrackers();
+      setMessage(d.ok ? `トラッカー登録: ${d.registered}/${d.total}件 完了` : `登録失敗: ${d.message}`);
+      refreshStatus();
+    } catch {
+      setMessage("トラッカー登録に失敗しました");
+    } finally {
+      setRegistering(false);
+    }
+  };
+
   const toggleCat = (id: number) =>
     setSelectedCats((prev) => prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]);
 
@@ -126,6 +143,17 @@ export default function PoolPage() {
           <p className="text-xs text-gray-500 mt-3">
             プールの商品はKeepaが24時間監視し、目標仕入れ価格（90日中央値×0.77）を割った瞬間に即時通知されます
           </p>
+          {approvedCount > 0 && !jobRunning && (
+            <div className="mt-3 flex items-center gap-3 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2.5">
+              <p className="text-sm text-yellow-800 flex-1">
+                審査合格済みでトラッカー未登録の商品が <b>{approvedCount}件</b> あります
+              </p>
+              <button onClick={handleRegister} disabled={registering}
+                className="px-4 py-1.5 bg-orange-500 hover:bg-orange-600 text-white text-xs font-semibold rounded-lg disabled:opacity-50 transition shrink-0">
+                {registering ? "登録中..." : "🔗 トラッカー登録を実行"}
+              </button>
+            </div>
+          )}
         </div>
 
         {/* プール構築条件 */}
