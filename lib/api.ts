@@ -64,3 +64,53 @@ export async function updateSettings(data: Record<string, unknown>) {
   if (!res.ok) throw new Error("保存失敗");
   return res.json();
 }
+
+// ─── 監視プール ───
+
+export async function getPoolCategories() {
+  const res = await fetch(`${BASE_URL}/api/pool/categories`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export async function previewPool(criteria: Record<string, unknown>) {
+  const res = await fetch(`${BASE_URL}/api/pool/preview`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify(criteria),
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export async function buildPool(criteria: Record<string, unknown>) {
+  const res = await fetch(`${BASE_URL}/api/pool/build`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify(criteria),
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export async function importPoolCsv(asins: string[]) {
+  const res = await fetch(`${BASE_URL}/api/pool/import-csv`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ asins }),
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export async function getPoolStatus() {
+  const res = await fetch(`${BASE_URL}/api/pool/status`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export async function getPoolList() {
+  const res = await fetch(`${BASE_URL}/api/pool/list`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}

@@ -75,6 +75,7 @@ export default function DashboardPage() {
           <h1 className="text-lg font-bold text-orange-500">Amazon刈り取りモニター</h1>
         </div>
         <div className="flex gap-3 items-center">
+          <button onClick={() => router.push("/pool")} className="text-sm text-gray-500 hover:text-gray-900">📡 監視プール</button>
           <button onClick={() => router.push("/settings")} className="text-sm text-gray-500 hover:text-gray-900">設定</button>
           <button onClick={() => { logout(); router.replace("/login"); }} className="text-sm text-red-500 hover:text-red-400">ログアウト</button>
         </div>
