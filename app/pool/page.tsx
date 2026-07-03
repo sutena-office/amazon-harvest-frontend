@@ -36,9 +36,15 @@ export default function PoolPage() {
         setTrackingCount(d.tracking_count + d.approved_count);
         setApprovedCount(d.approved_count);
       })
-      .catch(() => {});
+      .catch((e) => {
+        const msg = e?.message || "";
+        if (msg.includes("401")) {
+          setMessage("ログインの有効期限が切れました。再ログインしてください。");
+          router.replace("/login");
+        }
+      });
     getPoolList().then(setWatchList).catch(() => {});
-  }, []);
+  }, [router]);
 
   useEffect(() => {
     const token = localStorage.getItem("access_token");
