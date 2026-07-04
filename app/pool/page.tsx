@@ -28,16 +28,22 @@ export default function PoolPage() {
   const [registering, setRegistering] = useState(false);
   const [watchList, setWatchList] = useState<WatchItem[]>([]);
   const [csvText, setCsvText] = useState("");
+  const [debugInfo, setDebugInfo] = useState("");
 
   const refreshStatus = useCallback(() => {
+    setDebugInfo(`取得中... ${new Date().toLocaleTimeString("ja-JP")}`);
     getPoolStatus()
       .then((d) => {
         setJob(d.job);
         setTrackingCount(d.tracking_count + d.approved_count);
         setApprovedCount(d.approved_count);
+        setDebugInfo(
+          `[${new Date().toLocaleTimeString("ja-JP")}] tracking=${d.tracking_count} approved=${d.approved_count} job_status=${d.job ? d.job.status : "null"} job_total=${d.job ? d.job.total : "-"} job_screened=${d.job ? d.job.screened : "-"}`
+        );
       })
       .catch((e) => {
         const msg = e?.message || "unknown";
+        setDebugInfo(`[${new Date().toLocaleTimeString("ja-JP")}] エラー: ${msg}`);
         if (msg.includes("401")) {
           setMessage("ログインの有効期限が切れました。再ログインしてください。");
           router.replace("/login");
@@ -131,6 +137,12 @@ export default function PoolPage() {
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+
+        {debugInfo && (
+          <div className="bg-gray-900 text-green-400 text-xs font-mono px-4 py-2 rounded-lg break-all">
+            {debugInfo}
+          </div>
+        )}
 
         {/* 稼働状況 */}
         <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
