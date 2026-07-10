@@ -103,6 +103,15 @@ export async function importPoolCsv(asins: string[]) {
   return res.json();
 }
 
+export async function prunePool() {
+  const res = await fetch(`${BASE_URL}/api/pool/prune`, {
+    method: "POST",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
 export async function registerTrackers() {
   const res = await fetch(`${BASE_URL}/api/pool/register`, {
     method: "POST",

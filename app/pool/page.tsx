@@ -2,8 +2,10 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  getPoolCategories, previewPool, buildPool, importPoolCsv, getPoolStatus, getPoolList, registerTrackers,
+  getPoolCategories, previewPool, buildPool, importPoolCsv, getPoolStatus, getPoolList, registerTrackers, prunePool,
 } from "@/lib/api";
+
+const DEFAULT_EXCLUDE_NAMES = ["ミュージック", "デジタルミュージック"];
 
 type Category = { id: number; name: string };
 type Job = { id: string; status: string; total: number; screened: number; approved: number };
@@ -17,6 +19,8 @@ export default function PoolPage() {
   const router = useRouter();
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCats, setSelectedCats] = useState<number[]>([]);
+  const [excludedCats, setExcludedCats] = useState<number[]>([]);
+  const [pruning, setPruning] = useState(false);
   const [form, setForm] = useState({ min_price: 5000, max_price: 50000, min_sellers: 3, max_rank: 50000 });
   const [preview, setPreview] = useState<{ total: number } | null>(null);
   const [previewing, setPreviewing] = useState(false);
@@ -59,13 +63,19 @@ export default function PoolPage() {
   useEffect(() => {
     const token = localStorage.getItem("access_token");
     if (!token) { router.replace("/login"); return; }
-    getPoolCategories().then(setCategories).catch(() => {});
+    getPoolCategories()
+      .then((cats: Category[]) => {
+        setCategories(cats);
+        const defaults = cats.filter((c) => DEFAULT_EXCLUDE_NAMES.includes(c.name)).map((c) => c.id);
+        setExcludedCats(defaults);
+      })
+      .catch(() => {});
     refreshStatus();
     const timer = setInterval(refreshStatus, 30000);
     return () => clearInterval(timer);
   }, [router, refreshStatus]);
 
-  const criteria = () => ({ ...form, categories: selectedCats });
+  const criteria = () => ({ ...form, categories: selectedCats, exclude_categories: excludedCats });
 
   const handlePreview = async () => {
     setPreviewing(true);
@@ -125,6 +135,24 @@ export default function PoolPage() {
   const toggleCat = (id: number) =>
     setSelectedCats((prev) => prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]);
 
+  const toggleExcludeCat = (id: number) =>
+    setExcludedCats((prev) => prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]);
+
+  const handlePrune = async () => {
+    if (!confirm("輸入品/音楽系に該当する登録済み商品をKeepaトラッカーごと削除します。よろしいですか？")) return;
+    setPruning(true);
+    setMessage("");
+    try {
+      const d = await prunePool();
+      setMessage(`整理完了: ${d.checked}件中${d.removed}件を除外しました`);
+      refreshStatus();
+    } catch {
+      setMessage("整理に失敗しました");
+    } finally {
+      setPruning(false);
+    }
+  };
+
   const jobRunning = job?.status === "running";
 
   return (
@@ -165,6 +193,12 @@ export default function PoolPage() {
           <p className="text-xs text-gray-500 mt-3">
             プールの商品はKeepaが24時間監視し、目標仕入れ価格（90日中央値×0.77）を割った瞬間に即時通知されます
           </p>
+          <div className="mt-3">
+            <button onClick={handlePrune} disabled={pruning}
+              className="px-3 py-1.5 bg-white border border-gray-300 hover:bg-red-50 hover:border-red-300 text-gray-700 text-xs font-semibold rounded-lg disabled:opacity-50 transition">
+              {pruning ? "整理中..." : "🧹 輸入品/音楽系を登録済みプールから除外"}
+            </button>
+          </div>
           {approvedCount > 0 && !jobRunning && (
             <div className="mt-3 flex items-center gap-3 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2.5">
               <p className="text-sm text-yellow-800 flex-1">
@@ -227,7 +261,26 @@ export default function PoolPage() {
               {categories.length === 0 && <p className="text-xs text-gray-400">カテゴリ読み込み中...</p>}
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              おすすめ: ゲーム・おもちゃ・ホビー・ミュージック等のシュリンク付き商品（新品規約の壁をクリアしやすい）
+              おすすめ: ゲーム・おもちゃ・ホビー等のシュリンク付き商品（新品規約の壁をクリアしやすい）
+            </p>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">除外カテゴリ（目利きできない商材を対象外に）</label>
+            <div className="flex flex-wrap gap-2">
+              {categories.map((c) => (
+                <button key={c.id} onClick={() => toggleExcludeCat(c.id)}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                    excludedCats.includes(c.id)
+                      ? "bg-red-500 text-white border-red-500"
+                      : "bg-white text-gray-600 border-gray-300 hover:border-red-400"
+                  }`}>
+                  {c.name}
+                </button>
+              ))}
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              ミュージック・デジタルミュージックはデフォルトで除外済み。タイトルに「輸入盤」「並行輸入」等が含まれる商品も自動で除外します。
             </p>
           </div>
 
