@@ -193,10 +193,14 @@ export default function PoolPage() {
           <p className="text-xs text-gray-500 mt-3">
             プールの商品はKeepaが24時間監視し、目標仕入れ価格（90日中央値×0.77）を割った瞬間に即時通知されます
           </p>
-          <div className="mt-3">
+          <div className="mt-3 flex flex-wrap gap-2">
             <button onClick={handlePrune} disabled={pruning}
               className="px-3 py-1.5 bg-white border border-gray-300 hover:bg-red-50 hover:border-red-300 text-gray-700 text-xs font-semibold rounded-lg disabled:opacity-50 transition">
               {pruning ? "整理中..." : "🧹 輸入品/音楽系を登録済みプールから除外"}
+            </button>
+            <button onClick={handleRegister} disabled={registering}
+              className="px-3 py-1.5 bg-white border border-gray-300 hover:bg-orange-50 hover:border-orange-300 text-gray-700 text-xs font-semibold rounded-lg disabled:opacity-50 transition">
+              {registering ? "更新中..." : "🔁 トラッカー設定を一括更新"}
             </button>
           </div>
           {approvedCount > 0 && !jobRunning && (
