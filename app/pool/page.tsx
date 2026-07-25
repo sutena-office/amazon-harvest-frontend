@@ -196,7 +196,7 @@ export default function PoolPage() {
           <div className="mt-3 flex flex-wrap gap-2">
             <button onClick={handlePrune} disabled={pruning}
               className="px-3 py-1.5 bg-white border border-gray-300 hover:bg-red-50 hover:border-red-300 text-gray-700 text-xs font-semibold rounded-lg disabled:opacity-50 transition">
-              {pruning ? "整理中..." : "🧹 輸入品/音楽系を登録済みプールから除外"}
+              {pruning ? "整理中..." : "🧹 輸入品/音楽/アダルト系を登録済みプールから除外"}
             </button>
             <button onClick={handleRegister} disabled={registering}
               className="px-3 py-1.5 bg-white border border-gray-300 hover:bg-orange-50 hover:border-orange-300 text-gray-700 text-xs font-semibold rounded-lg disabled:opacity-50 transition">
@@ -284,7 +284,7 @@ export default function PoolPage() {
               ))}
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              ミュージック・デジタルミュージックはデフォルトで除外済み。タイトルに「輸入盤」「並行輸入」等が含まれる商品も自動で除外します。
+              ミュージック・デジタルミュージックはデフォルトで除外済み。タイトルに「輸入盤」「並行輸入」等の輸入品や、「アダルト」「18禁」等のAV・アダルト系も自動で除外します。
             </p>
           </div>
 
