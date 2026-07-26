@@ -177,7 +177,7 @@ export default function SourcingPage() {
             <div>
               <h2 className="font-bold text-gray-900">仕入れ候補（利益順）</h2>
               <p className="text-xs text-gray-500 mt-0.5">
-                実質仕入れ値 = Yahoo!価格 − ポイント ／ 利益 = Amazon売価×82% − 実質仕入れ値。毎日自動で再チェックされます
+                実質仕入れ値 = Yahoo!価格 −（ストア独自P ＋ PayPay基本P ＋ 選択した仕入れ日の還元）／ 利益 = Amazon売価×82% − 実質仕入れ値
               </p>
             </div>
             <div className="flex gap-2 items-center shrink-0">
