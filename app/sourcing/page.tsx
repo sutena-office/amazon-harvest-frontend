@@ -18,7 +18,8 @@ type Seed = {
 type Candidate = {
   id: string; asin: string; jan: string; product_name: string;
   amazon_price: number; amazon_rank: number; est_monthly_sales: number;
-  seller_count: number;
+  sales_is_actual: boolean; seller_count: number;
+  grade: string; grade_note: string;
   yahoo_price: number; yahoo_point: number; yahoo_effective: number;
   yahoo_url: string; yahoo_store: string;
   profit_amount: number; profit_rate: number;
@@ -27,6 +28,14 @@ type Candidate = {
 };
 
 const COURSE_PRICE = 550000; // Amazon講座の受講料
+
+// 実務基準のグレード表示
+const GRADE_STYLE: Record<string, { cls: string; label: string }> = {
+  S: { cls: "bg-green-600 text-white", label: "S 理想" },
+  A: { cls: "bg-green-100 text-green-700", label: "A 適合" },
+  B: { cls: "bg-yellow-100 text-yellow-700", label: "B 要検討" },
+  C: { cls: "bg-gray-100 text-gray-500", label: "C 不適合" },
+};
 
 // 「今日の還元を自動適用」が既定。手動シミュレーション用のプリセット
 const CAMPAIGN_PRESETS: { label: string; percent: number | null; cap: number | null }[] = [
@@ -216,7 +225,11 @@ export default function SourcingPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h2 className="font-bold text-gray-900">仕入れ候補（利益順）</h2>
+              <h2 className="font-bold text-gray-900">仕入れ候補（実務基準グレード順）</h2>
+              <p className="text-xs text-gray-600 mt-1">
+                判定基準：<b>月販200個以上</b>／<b>ランク5,000位以内</b>（上限1万位）／<b>出品者10人以上</b>
+                <span className="text-gray-400">（出品者3〜5人は卸契約者限定で新規が出品できない恐れ）</span>
+              </p>
               <p className="text-xs text-gray-500 mt-0.5">
                 実質仕入れ値 = Yahoo!価格 −（ストア独自P ＋ PayPay基本P ＋ 選択した仕入れ日の還元）／ 利益 = Amazon売価×82% − 実質仕入れ値
               </p>
@@ -248,10 +261,31 @@ export default function SourcingPage() {
                 <div key={c.id} className={`py-3 ${c.profit_amount > 0 ? "" : "opacity-50"}`}>
                   <div className="flex items-start gap-3">
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-gray-900 text-sm leading-snug">{c.product_name}</p>
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        ランク {c.amazon_rank?.toLocaleString()}位 ・ 月販目安 <b className="text-gray-700">{c.est_monthly_sales || 0}個</b> ・ 出品者{c.seller_count || 0}人 ・ {c.yahoo_store}
+                      <div className="flex items-center gap-2">
+                        {c.grade && (
+                          <span className={`text-xs font-bold px-2 py-0.5 rounded shrink-0 ${GRADE_STYLE[c.grade]?.cls || GRADE_STYLE.C.cls}`}>
+                            {GRADE_STYLE[c.grade]?.label || c.grade}
+                          </span>
+                        )}
+                        <p className="font-medium text-gray-900 text-sm leading-snug min-w-0">{c.product_name}</p>
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        <span className={c.amazon_rank > 0 && c.amazon_rank <= 5000 ? "text-green-600 font-semibold" : ""}>
+                          ランク {c.amazon_rank?.toLocaleString()}位
+                        </span>
+                        {" ・ "}
+                        <span className={c.est_monthly_sales >= 200 ? "text-green-600 font-semibold" : ""}>
+                          月販 {c.est_monthly_sales || 0}個{c.sales_is_actual ? "" : "(推定)"}
+                        </span>
+                        {" ・ "}
+                        <span className={c.seller_count >= 10 ? "text-green-600 font-semibold" : "text-red-500 font-semibold"}>
+                          出品者{c.seller_count || 0}人
+                        </span>
+                        {" ・ "}{c.yahoo_store}
                       </p>
+                      {c.grade_note && c.grade === "C" && (
+                        <p className="text-xs text-gray-400 mt-0.5">{c.grade_note}</p>
+                      )}
                       {(c.student_monthly_profit || 0) >= 10000 && (
                         <p className="text-xs mt-1">
                           <span className={`inline-block px-2 py-0.5 rounded font-bold ${
