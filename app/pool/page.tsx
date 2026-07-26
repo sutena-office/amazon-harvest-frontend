@@ -6,9 +6,20 @@ import {
   registerTrackers, prunePool, resetPool, getPoolBudget,
 } from "@/lib/api";
 
-const DEFAULT_EXCLUDE_NAMES = ["ミュージック", "デジタルミュージック"];
+// 音楽系（目利き不可）＋真贋リスク大カテゴリをデフォルトで除外
+const DEFAULT_EXCLUDE_NAMES = ["ミュージック", "デジタルミュージック", "ビューティー", "ファッション"];
 
-type Category = { id: number; name: string };
+const TIER_STYLES: Record<string, { label: string; badge: string }> = {
+  S: { label: "S 最優先（プリンター型の勝ち筋）", badge: "bg-orange-500 text-white" },
+  A: { label: "A 有力", badge: "bg-orange-100 text-orange-700" },
+  B: { label: "B 条件付き（要目利き）", badge: "bg-gray-200 text-gray-700" },
+  C: { label: "C 非推奨（真贋リスク・値崩れ）", badge: "bg-red-100 text-red-600" },
+};
+
+type Category = {
+  id: number; name: string;
+  tier?: string; tier_label?: string; reason?: string; counterfeit_risk?: boolean;
+};
 type Job = { id: string; status: string; total: number; screened: number; approved: number };
 type WatchItem = {
   id: string; asin: string; product_name: string; median_price_90d: number;
@@ -22,7 +33,7 @@ export default function PoolPage() {
   const [selectedCats, setSelectedCats] = useState<number[]>([]);
   const [excludedCats, setExcludedCats] = useState<number[]>([]);
   const [pruning, setPruning] = useState(false);
-  const [form, setForm] = useState({ min_price: 5000, max_price: 50000, min_sellers: 3, max_rank: 50000 });
+  const [form, setForm] = useState({ min_price: 10000, max_price: 60000, min_sellers: 3, min_rank: 1, max_rank: 50000 });
   const [preview, setPreview] = useState<{ total: number } | null>(null);
   const [previewing, setPreviewing] = useState(false);
   const [building, setBuilding] = useState(false);
@@ -270,10 +281,20 @@ export default function PoolPage() {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">ランキング上限</label>
-              <input type="number" value={form.max_rank}
-                onChange={(e) => setForm({ ...form, max_rank: Number(e.target.value) })}
-                className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400" />
+              <label className="block text-sm font-semibold text-gray-700 mb-1">対象ランキング範囲</label>
+              <div className="flex items-center gap-2">
+                <input type="number" value={form.min_rank}
+                  onChange={(e) => setForm({ ...form, min_rank: Number(e.target.value) })}
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  min={1} placeholder="1" />
+                <span className="text-gray-400 shrink-0 text-sm">位 〜</span>
+                <input type="number" value={form.max_rank}
+                  onChange={(e) => setForm({ ...form, max_rank: Number(e.target.value) })}
+                  className="w-full bg-white border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+                  min={1} />
+                <span className="text-gray-400 shrink-0 text-sm">位</span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">例: 100位〜50000位（超上位は競合過多のため外す戦略も有効）</p>
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">新品出品者数（Amazon込み）</label>
@@ -287,21 +308,38 @@ export default function PoolPage() {
 
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">カテゴリ（未選択 = 全カテゴリ）</label>
-            <div className="flex flex-wrap gap-2">
-              {categories.map((c) => (
-                <button key={c.id} onClick={() => toggleCat(c.id)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
-                    selectedCats.includes(c.id)
-                      ? "bg-orange-500 text-white border-orange-500"
-                      : "bg-white text-gray-600 border-gray-300 hover:border-orange-400"
-                  }`}>
-                  {c.name}
-                </button>
-              ))}
-              {categories.length === 0 && <p className="text-xs text-gray-400">カテゴリ読み込み中...</p>}
+            {categories.length === 0 && <p className="text-xs text-gray-400">カテゴリ読み込み中...</p>}
+            <div className="space-y-3">
+              {["S", "A", "B", "C"].map((tier) => {
+                const group = categories.filter((c) => (c.tier || "B") === tier);
+                if (group.length === 0) return null;
+                return (
+                  <div key={tier}>
+                    <p className="text-xs font-bold text-gray-500 mb-1.5">
+                      <span className={`inline-block px-1.5 py-0.5 rounded mr-1.5 ${TIER_STYLES[tier].badge}`}>{tier}</span>
+                      {TIER_STYLES[tier].label.replace(/^[SABC] /, "")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {group.map((c) => (
+                        <button key={c.id} onClick={() => toggleCat(c.id)}
+                          title={c.reason || ""}
+                          className={`px-3 py-1.5 rounded-full text-xs font-medium border transition ${
+                            selectedCats.includes(c.id)
+                              ? "bg-orange-500 text-white border-orange-500"
+                              : tier === "C"
+                                ? "bg-white text-gray-400 border-gray-200 hover:border-red-300"
+                                : "bg-white text-gray-600 border-gray-300 hover:border-orange-400"
+                          }`}>
+                          {c.name}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              おすすめ: ゲーム・おもちゃ・ホビー等のシュリンク付き商品（新品規約の壁をクリアしやすい）
+              おすすめ: SランクからスタートしAランクで拡張。デジタル商品（Kindle等）は転売不可のため一覧から除外済み。
             </p>
           </div>
 
@@ -320,7 +358,7 @@ export default function PoolPage() {
               ))}
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              ミュージック・デジタルミュージックはデフォルトで除外済み。タイトルに「輸入盤」「並行輸入」等の輸入品や、「アダルト」「18禁」等のAV・アダルト系も自動で除外します。
+              ミュージック系（目利き不可）とビューティー・ファッション（真贋調査リスク大）はデフォルトで除外済み。タイトルに「輸入盤」「並行輸入」等の輸入品や、「アダルト」「18禁」等のAV・アダルト系も自動で除外します。
             </p>
           </div>
 
