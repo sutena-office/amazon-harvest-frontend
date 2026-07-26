@@ -12,11 +12,15 @@ type Seed = {
 type Candidate = {
   id: string; asin: string; jan: string; product_name: string;
   amazon_price: number; amazon_rank: number; est_monthly_sales: number;
+  seller_count: number;
   yahoo_price: number; yahoo_point: number; yahoo_effective: number;
   yahoo_url: string; yahoo_store: string;
   profit_amount: number; profit_rate: number;
-  expected_monthly_profit: number; updated_at: string;
+  expected_monthly_profit: number; student_monthly_profit: number;
+  updated_at: string;
 };
+
+const COURSE_PRICE = 550000; // Amazon講座の受講料
 
 // プロの仕入れ日カレンダーに基づくキャンペーンプリセット
 const CAMPAIGN_PRESETS = [
@@ -205,8 +209,18 @@ export default function SourcingPage() {
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-gray-900 text-sm leading-snug">{c.product_name}</p>
                       <p className="text-xs text-gray-500 mt-0.5">
-                        ランク {c.amazon_rank?.toLocaleString()}位 ・ 月販目安 <b className="text-gray-700">{c.est_monthly_sales || 0}個</b> ・ {c.yahoo_store}
+                        ランク {c.amazon_rank?.toLocaleString()}位 ・ 月販目安 <b className="text-gray-700">{c.est_monthly_sales || 0}個</b> ・ 出品者{c.seller_count || 0}人 ・ {c.yahoo_store}
                       </p>
+                      {(c.student_monthly_profit || 0) >= 10000 && (
+                        <p className="text-xs mt-1">
+                          <span className={`inline-block px-2 py-0.5 rounded font-bold ${
+                            c.student_monthly_profit >= 50000 ? "bg-green-100 text-green-700" : "bg-blue-50 text-blue-700"
+                          }`}>
+                            🎓 講座生1人あたり 月¥{c.student_monthly_profit.toLocaleString()}
+                            {c.student_monthly_profit > 0 && ` ／ 講座ペイまで約${Math.ceil(COURSE_PRICE / c.student_monthly_profit)}ヶ月`}
+                          </span>
+                        </p>
+                      )}
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0">
                       <span className={`text-sm font-bold px-2.5 py-1 rounded-full ${
