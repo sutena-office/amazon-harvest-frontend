@@ -279,7 +279,8 @@ export default function SourcingPage() {
                     </div>
                   </div>
                   <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-gray-600">
-                    <span>Yahoo! ¥{c.yahoo_price?.toLocaleString()}（P{c.yahoo_point?.toLocaleString()}）
+                    <span>Yahoo! ¥{c.yahoo_price?.toLocaleString()}
+                      <span className="text-red-500 font-semibold"> −P{c.yahoo_point?.toLocaleString()}</span>
                       → 実質 <b className="text-blue-600">¥{c.yahoo_effective?.toLocaleString()}</b></span>
                     <span>Amazon売価 ¥{c.amazon_price?.toLocaleString()}</span>
                     <span>利益率 {c.profit_rate}%</span>
