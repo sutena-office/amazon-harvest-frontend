@@ -172,10 +172,11 @@ export async function getSourcingCandidates() {
   return res.json();
 }
 
-export async function rescanYahoo() {
+export async function rescanYahoo(boostPercent = 0, boostCap = 0) {
   const res = await fetch(`${BASE_URL}/api/sourcing/rescan`, {
     method: "POST",
     headers: authHeaders(),
+    body: JSON.stringify({ boost_percent: boostPercent, boost_cap: boostCap }),
   });
   if (!res.ok) throw new Error(`${res.status}`);
   return res.json();
