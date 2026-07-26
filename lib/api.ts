@@ -112,6 +112,21 @@ export async function prunePool() {
   return res.json();
 }
 
+export async function resetPool() {
+  const res = await fetch(`${BASE_URL}/api/pool/reset`, {
+    method: "POST",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export async function getPoolBudget() {
+  const res = await fetch(`${BASE_URL}/api/pool/budget`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
 export async function registerTrackers() {
   const res = await fetch(`${BASE_URL}/api/pool/register`, {
     method: "POST",

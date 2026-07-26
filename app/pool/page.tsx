@@ -2,7 +2,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
-  getPoolCategories, previewPool, buildPool, importPoolCsv, getPoolStatus, getPoolList, registerTrackers, prunePool,
+  getPoolCategories, previewPool, buildPool, importPoolCsv, getPoolStatus, getPoolList,
+  registerTrackers, prunePool, resetPool, getPoolBudget,
 } from "@/lib/api";
 
 const DEFAULT_EXCLUDE_NAMES = ["ミュージック", "デジタルミュージック"];
@@ -33,6 +34,11 @@ export default function PoolPage() {
   const [watchList, setWatchList] = useState<WatchItem[]>([]);
   const [csvText, setCsvText] = useState("");
   const [debugInfo, setDebugInfo] = useState("");
+  const [resetting, setResetting] = useState(false);
+  const [budget, setBudget] = useState<{
+    refill_rate: number; flow_reduction: number; tokens_left: number;
+    screening_pace_seconds: number; tracker_interval_hours: number;
+  } | null>(null);
 
   const refreshStatus = useCallback(() => {
     setDebugInfo(`取得中... ${new Date().toLocaleTimeString("ja-JP")}`);
@@ -58,6 +64,7 @@ export default function PoolPage() {
     getPoolList()
       .then(setWatchList)
       .catch((e) => setMessage((prev) => prev || `リスト取得エラー(${e?.message || "unknown"})`));
+    getPoolBudget().then(setBudget).catch(() => {});
   }, [router]);
 
   useEffect(() => {
@@ -132,6 +139,21 @@ export default function PoolPage() {
     }
   };
 
+  const handleReset = async () => {
+    if (!confirm("監視プールを完全に空にします（Keepaトラッカーも全削除）。カテゴリを変えて作り直す場合に使います。よろしいですか？")) return;
+    setResetting(true);
+    setMessage("");
+    try {
+      const d = await resetPool();
+      setMessage(d.ok ? `プールをリセットしました（${d.removed}件削除）` : `失敗: ${d.message}`);
+      refreshStatus();
+    } catch {
+      setMessage("リセットに失敗しました");
+    } finally {
+      setResetting(false);
+    }
+  };
+
   const toggleCat = (id: number) =>
     setSelectedCats((prev) => prev.includes(id) ? prev.filter((c) => c !== id) : [...prev, id]);
 
@@ -202,7 +224,21 @@ export default function PoolPage() {
               className="px-3 py-1.5 bg-white border border-gray-300 hover:bg-orange-50 hover:border-orange-300 text-gray-700 text-xs font-semibold rounded-lg disabled:opacity-50 transition">
               {registering ? "更新中..." : "🔁 トラッカー設定を一括更新"}
             </button>
+            <button onClick={handleReset} disabled={resetting}
+              className="px-3 py-1.5 bg-white border border-red-300 hover:bg-red-50 text-red-600 text-xs font-semibold rounded-lg disabled:opacity-50 transition">
+              {resetting ? "削除中..." : "🗑 プールを空にして作り直す"}
+            </button>
           </div>
+
+          {budget && (
+            <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-xs text-gray-600 flex flex-wrap gap-x-4 gap-y-1">
+              <span>Keepa補充 <b className="text-gray-900">{budget.refill_rate}/分</b></span>
+              <span>トラッカー維持費 <b className="text-gray-900">{budget.flow_reduction.toFixed(1)}/分</b></span>
+              <span>残トークン <b className={budget.tokens_left < 0 ? "text-red-600" : "text-gray-900"}>{budget.tokens_left.toLocaleString()}</b></span>
+              <span>審査ペース <b className="text-gray-900">{budget.screening_pace_seconds}秒/件</b></span>
+              <span>価格チェック <b className="text-gray-900">{budget.tracker_interval_hours}時間ごと</b></span>
+            </div>
+          )}
           {approvedCount > 0 && !jobRunning && (
             <div className="mt-3 flex items-center gap-3 bg-yellow-50 border border-yellow-200 rounded-lg px-4 py-2.5">
               <p className="text-sm text-yellow-800 flex-1">
