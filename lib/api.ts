@@ -182,6 +182,25 @@ export async function rescanYahoo(boostPercent: number | null = null, boostCap: 
   return res.json();
 }
 
+export async function downloadSourcingCsv(onlyProfitable = true) {
+  const res = await fetch(
+    `${BASE_URL}/api/sourcing/export?only_profitable=${onlyProfitable}`,
+    { headers: authHeaders() }
+  );
+  if (!res.ok) throw new Error(`${res.status}`);
+  const blob = await res.blob();
+  const disposition = res.headers.get("Content-Disposition") || "";
+  const match = disposition.match(/filename="(.+?)"/);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = match ? match[1] : "sourcing.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export async function getYahooCampaign() {
   const res = await fetch(`${BASE_URL}/api/sourcing/campaign`, { headers: authHeaders() });
   if (!res.ok) throw new Error(`${res.status}`);

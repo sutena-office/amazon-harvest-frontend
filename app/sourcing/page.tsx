@@ -3,7 +3,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   registerSeed, getSourcingSeeds, getSourcingCandidates, rescanYahoo, deleteSourcingCandidate,
-  getYahooCampaign,
+  getYahooCampaign, downloadSourcingCsv,
 } from "@/lib/api";
 
 type Campaign = {
@@ -235,6 +235,10 @@ export default function SourcingPage() {
               </p>
             </div>
             <div className="flex gap-2 items-center shrink-0">
+              <button onClick={() => downloadSourcingCsv(true).catch(() => setMessage("CSVの取得に失敗しました"))}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-semibold rounded-lg transition">
+                📊 CSVで書き出す
+              </button>
               <select value={preset} onChange={(e) => setPreset(Number(e.target.value))}
                 className="bg-white border border-gray-300 rounded-lg px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400">
                 {CAMPAIGN_PRESETS.map((p, i) => (
