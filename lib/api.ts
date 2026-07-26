@@ -147,3 +147,45 @@ export async function getPoolList() {
   if (!res.ok) throw new Error(`${res.status}`);
   return res.json();
 }
+
+// ─── Yahoo!仕入れモード ───
+
+export async function registerSeed(asinOrUrl: string) {
+  const res = await fetch(`${BASE_URL}/api/sourcing/seed`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ asin_or_url: asinOrUrl }),
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export async function getSourcingSeeds() {
+  const res = await fetch(`${BASE_URL}/api/sourcing/seeds`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export async function getSourcingCandidates() {
+  const res = await fetch(`${BASE_URL}/api/sourcing/candidates`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export async function rescanYahoo() {
+  const res = await fetch(`${BASE_URL}/api/sourcing/rescan`, {
+    method: "POST",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export async function deleteSourcingCandidate(id: string) {
+  const res = await fetch(`${BASE_URL}/api/sourcing/candidate/${id}`, {
+    method: "DELETE",
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
