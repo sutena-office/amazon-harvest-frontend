@@ -3,8 +3,13 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   registerSeed, getSourcingSeeds, getSourcingCandidates, rescanYahoo, deleteSourcingCandidate,
-  getYahooCampaign, downloadSourcingCsv,
+  getYahooCampaign, downloadSourcingCsv, getRescanStatus,
 } from "@/lib/api";
+
+type RescanStatus = {
+  status: string; checked?: number; total?: number;
+  new_finds?: number; error?: string | null; finished_at?: string;
+};
 
 type Campaign = {
   today: { date: string; rate: number; cap: number; summary: string };
@@ -58,9 +63,11 @@ export default function SourcingPage() {
   const [rescanning, setRescanning] = useState(false);
   const [preset, setPreset] = useState(0);
   const [campaign, setCampaign] = useState<Campaign | null>(null);
+  const [rescanStatus, setRescanStatus] = useState<RescanStatus | null>(null);
 
   const refresh = useCallback(() => {
     getSourcingSeeds().then(setSeeds).catch(() => {});
+    getRescanStatus().then(setRescanStatus).catch(() => {});
     getSourcingCandidates().then(setCandidates).catch((e) => {
       if ((e?.message || "").includes("401")) router.replace("/login");
     });
@@ -221,6 +228,23 @@ export default function SourcingPage() {
           <div className="bg-blue-50 border border-blue-200 text-blue-700 text-sm px-4 py-2 rounded-lg">{message}</div>
         )}
 
+        {rescanStatus && rescanStatus.status === "aborted" && (
+          <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-3 rounded-lg">
+            <p className="font-bold">⚠️ 前回の再チェックは途中で止まりました</p>
+            <p className="mt-1">{rescanStatus.error}</p>
+            <p className="mt-1 text-xs">
+              {rescanStatus.checked}/{rescanStatus.total}件で中断。下の数字は古い条件のままの可能性があります。
+              時間をおいて再チェックしてください
+            </p>
+          </div>
+        )}
+        {rescanStatus && rescanStatus.status === "done" && (
+          <div className="bg-gray-50 border border-gray-200 text-gray-600 text-xs px-4 py-2 rounded-lg">
+            ✅ 前回の再チェック: {rescanStatus.checked}/{rescanStatus.total}件を更新
+            （新たに利益が出た商品 {rescanStatus.new_finds}件）
+          </div>
+        )}
+
         {/* 候補リスト */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
           <div className="flex justify-between items-center mb-4">
@@ -231,7 +255,8 @@ export default function SourcingPage() {
                 <span className="text-gray-400">（出品者3〜5人は卸契約者限定で新規が出品できない恐れ）</span>
               </p>
               <p className="text-xs text-gray-500 mt-0.5">
-                実質仕入れ値 = Yahoo!価格 −（ストア独自P ＋ PayPay基本P ＋ 選択した仕入れ日の還元）／ 利益 = Amazon売価×82% − 実質仕入れ値
+                実質仕入れ値 = Yahoo!価格 − Σ min(各キャンペーンの還元, その付与上限)／ 利益 = Amazon売価×82% − 実質仕入れ値
+                <span className="text-gray-400">※ポイントは税抜価格ベース。5のつく日1,000pt・日曜2,000pt等の上限があるため高額品ほど還元率は下がります</span>
               </p>
             </div>
             <div className="flex gap-2 items-center shrink-0">

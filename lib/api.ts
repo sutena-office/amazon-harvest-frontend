@@ -201,6 +201,12 @@ export async function downloadSourcingCsv(onlyProfitable = true) {
   URL.revokeObjectURL(url);
 }
 
+export async function getRescanStatus() {
+  const res = await fetch(`${BASE_URL}/api/sourcing/rescan-status`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
 export async function getYahooCampaign() {
   const res = await fetch(`${BASE_URL}/api/sourcing/campaign`, { headers: authHeaders() });
   if (!res.ok) throw new Error(`${res.status}`);
