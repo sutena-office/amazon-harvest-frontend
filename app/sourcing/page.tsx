@@ -37,13 +37,13 @@ const GRADE_STYLE: Record<string, { cls: string; label: string }> = {
   C: { cls: "bg-gray-100 text-gray-500", label: "C 不適合" },
 };
 
-// 「今日の還元を自動適用」が既定。手動シミュレーション用のプリセット
-const CAMPAIGN_PRESETS: { label: string; percent: number | null; cap: number | null }[] = [
-  { label: "今日の還元を自動適用", percent: null, cap: null },
-  { label: "通常日として計算", percent: 0, cap: 0 },
-  { label: "5のつく日 (+4%)", percent: 4, cap: 1000 },
-  { label: "5のつく日+日曜 (+9%)", percent: 9, cap: 2000 },
-  { label: "超PayPay祭 (+12%)", percent: 12, cap: 5000 },
+// どの仕入れ日として計算するか。付与上限はキャンペーンごとに個別適用される
+const CAMPAIGN_PRESETS: { label: string; scenario: string }[] = [
+  { label: "今日の還元を自動適用", scenario: "auto" },
+  { label: "通常日として計算", scenario: "normal" },
+  { label: "5のつく日 (+4%/上限1,000pt)", scenario: "five_day" },
+  { label: "5のつく日+日曜 (+9%/上限3,000pt)", scenario: "five_sun" },
+  { label: "超PayPay祭 (+7%/上限7,000pt)", scenario: "matsuri" },
 ];
 
 const MONTHLY_GOAL = 300000; // 月間目標利益（円）
@@ -95,8 +95,7 @@ export default function SourcingPage() {
     setRescanning(true);
     setMessage("");
     try {
-      const p = CAMPAIGN_PRESETS[preset];
-      const d = await rescanYahoo(p.percent, p.cap);
+      const d = await rescanYahoo(CAMPAIGN_PRESETS[preset].scenario);
       setMessage(d.message);
     } catch {
       setMessage("再スキャンの開始に失敗しました");
