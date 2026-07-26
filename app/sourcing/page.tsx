@@ -130,7 +130,7 @@ export default function SourcingPage() {
         <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
           <div className="flex justify-between items-end mb-2">
             <div>
-              <p className="text-sm text-gray-500">月間期待利益（利益 × 月販目安の合計）</p>
+              <p className="text-sm text-gray-500">実現可能な月間利益（1商品 月4個まで・カート取得を考慮）</p>
               <p className="text-3xl font-bold text-blue-600">
                 ¥{totalExpected.toLocaleString()}
                 <span className="text-base text-gray-400 font-normal ml-2">/ 目標 ¥{MONTHLY_GOAL.toLocaleString()}</span>
@@ -143,7 +143,8 @@ export default function SourcingPage() {
               style={{ width: `${goalPct}%` }} />
           </div>
           <p className="text-xs text-gray-500 mt-2">
-            利益2,000円×月販30個の商品を5つ確保できれば月30万円に到達します。全商品を扱う必要はなく、上位の当たり商品に絞るのがプロの型です
+1商品あたり月4個（週1回の仕入れ日に1個ずつ）が上限の想定。Yahoo!ストアの購入制限とポイント付与上限があるためです。
+            利益1.5万円/個の商品なら5品目、7,500円/個なら10品目で月30万円に到達します
           </p>
         </div>
 
@@ -295,8 +296,9 @@ export default function SourcingPage() {
                           <span className={`inline-block px-2 py-0.5 rounded font-bold ${
                             c.student_monthly_profit >= 50000 ? "bg-green-100 text-green-700" : "bg-blue-50 text-blue-700"
                           }`}>
-                            🎓 講座生1人あたり 月¥{c.student_monthly_profit.toLocaleString()}
+                            🎓 1人あたり 月¥{c.student_monthly_profit.toLocaleString()}
                             {c.student_monthly_profit > 0 && ` ／ 講座ペイまで約${Math.ceil(COURSE_PRICE / c.student_monthly_profit)}ヶ月`}
+                            {c.student_monthly_profit > 0 && ` ／ 月30万にはこの商品${Math.ceil(300000 / c.student_monthly_profit)}品目`}
                           </span>
                         </p>
                       )}
@@ -311,7 +313,8 @@ export default function SourcingPage() {
                       </span>
                       {(c.expected_monthly_profit || 0) > 0 && (
                         <span className="text-xs font-bold text-blue-600">
-                          月間 ¥{c.expected_monthly_profit.toLocaleString()}
+                          月¥{c.expected_monthly_profit.toLocaleString()}
+                          <span className="font-normal text-gray-400">（月4個）</span>
                         </span>
                       )}
                     </div>
