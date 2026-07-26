@@ -3,7 +3,13 @@ import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import {
   registerSeed, getSourcingSeeds, getSourcingCandidates, rescanYahoo, deleteSourcingCandidate,
+  getYahooCampaign,
 } from "@/lib/api";
+
+type Campaign = {
+  today: { date: string; rate: number; cap: number; summary: string };
+  upcoming: { date: string; weekday: string; rate: number; cap: number; summary: string; days_from_now: number }[];
+};
 
 type Seed = {
   id: string; asin: string; title: string; brand: string;
@@ -22,11 +28,12 @@ type Candidate = {
 
 const COURSE_PRICE = 550000; // Amazon講座の受講料
 
-// プロの仕入れ日カレンダーに基づくキャンペーンプリセット
-const CAMPAIGN_PRESETS = [
-  { label: "通常日", percent: 0, cap: 0 },
+// 「今日の還元を自動適用」が既定。手動シミュレーション用のプリセット
+const CAMPAIGN_PRESETS: { label: string; percent: number | null; cap: number | null }[] = [
+  { label: "今日の還元を自動適用", percent: null, cap: null },
+  { label: "通常日として計算", percent: 0, cap: 0 },
   { label: "5のつく日 (+4%)", percent: 4, cap: 1000 },
-  { label: "5のつく日+倍倍 (+9%)", percent: 9, cap: 3000 },
+  { label: "5のつく日+日曜 (+9%)", percent: 9, cap: 2000 },
   { label: "超PayPay祭 (+12%)", percent: 12, cap: 5000 },
 ];
 
@@ -41,6 +48,7 @@ export default function SourcingPage() {
   const [submitting, setSubmitting] = useState(false);
   const [rescanning, setRescanning] = useState(false);
   const [preset, setPreset] = useState(0);
+  const [campaign, setCampaign] = useState<Campaign | null>(null);
 
   const refresh = useCallback(() => {
     getSourcingSeeds().then(setSeeds).catch(() => {});
@@ -53,6 +61,7 @@ export default function SourcingPage() {
     const token = localStorage.getItem("access_token");
     if (!token) { router.replace("/login"); return; }
     refresh();
+    getYahooCampaign().then(setCampaign).catch(() => {});
     const timer = setInterval(refresh, 30000);
     return () => clearInterval(timer);
   }, [router, refresh]);
@@ -128,6 +137,38 @@ export default function SourcingPage() {
             利益2,000円×月販30個の商品を5つ確保できれば月30万円に到達します。全商品を扱う必要はなく、上位の当たり商品に絞るのがプロの型です
           </p>
         </div>
+
+        {/* 本日の還元と狙い目日 */}
+        {campaign && (
+          <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
+            <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+              <span className="text-sm text-gray-500">本日の還元</span>
+              <span className="text-xl font-bold text-red-500">+{campaign.today.rate}%</span>
+              <span className="text-sm text-gray-600">{campaign.today.summary}</span>
+              {campaign.today.cap > 0 && (
+                <span className="text-xs text-gray-400">（付与上限 ¥{campaign.today.cap.toLocaleString()}）</span>
+              )}
+            </div>
+            {campaign.upcoming.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-gray-100">
+                <p className="text-xs text-gray-500 mb-2">今後の仕入れ狙い目日（還元率順）</p>
+                <div className="flex flex-wrap gap-2">
+                  {campaign.upcoming.slice(0, 6).map((u) => (
+                    <span key={u.date}
+                      className={`text-xs px-2.5 py-1 rounded-lg border ${
+                        u.days_from_now === 0
+                          ? "bg-red-50 border-red-200 text-red-600 font-bold"
+                          : "bg-gray-50 border-gray-200 text-gray-600"
+                      }`}>
+                      {u.date.slice(5).replace("-", "/")}（{u.weekday}） +{u.rate}%
+                      {u.days_from_now === 0 && " ← 今日"}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* 種の登録 */}
         <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm space-y-3">
