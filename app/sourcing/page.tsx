@@ -44,10 +44,11 @@ const GRADE_STYLE: Record<string, { cls: string; label: string }> = {
 
 // どの仕入れ日として計算するか。付与上限はキャンペーンごとに個別適用される
 const CAMPAIGN_PRESETS: { label: string; scenario: string }[] = [
+  { label: "日曜（毎週の主戦場・推奨）", scenario: "sunday" },
   { label: "今日の還元を自動適用", scenario: "auto" },
   { label: "通常日として計算", scenario: "normal" },
   { label: "5のつく日 (+4%/上限1,000pt)", scenario: "five_day" },
-  { label: "5のつく日+日曜 (+9%/上限3,000pt)", scenario: "five_sun" },
+  { label: "5のつく日+日曜（年に数回）", scenario: "five_sun" },
   { label: "超PayPay祭 (+7%/上限7,000pt)", scenario: "matsuri" },
 ];
 
