@@ -125,8 +125,24 @@ export default function SourcingPage() {
 
   const runningSeed = seeds.find((s) => s.status === "running");
   const profitable = candidates.filter((c) => c.profit_amount > 0);
-  const totalExpected = profitable.reduce((sum, c) => sum + (c.expected_monthly_profit || 0), 0);
+  // 上位から積み上げて目標に届く品目数を出す（全商品を扱う前提は非現実的なため）
+  const ranked = [...profitable].sort(
+    (a, b) => (b.expected_monthly_profit || 0) - (a.expected_monthly_profit || 0)
+  );
+  const totalExpected = ranked.reduce((sum, c) => sum + (c.expected_monthly_profit || 0), 0);
   const goalPct = Math.min(100, Math.round((totalExpected / MONTHLY_GOAL) * 100));
+
+  let acc = 0;
+  let itemsNeeded = 0;
+  for (const c of ranked) {
+    if (acc >= MONTHLY_GOAL) break;
+    acc += c.expected_monthly_profit || 0;
+    itemsNeeded++;
+  }
+  const reachable = acc >= MONTHLY_GOAL;
+  const avgPerItem = ranked.length
+    ? Math.round(totalExpected / ranked.length)
+    : 0;
 
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
@@ -156,9 +172,28 @@ export default function SourcingPage() {
               style={{ width: `${goalPct}%` }} />
           </div>
           <p className="text-xs text-gray-500 mt-2">
-1商品あたり月4個（週1回の仕入れ日に1個ずつ）が上限の想定。Yahoo!ストアの購入制限とポイント付与上限があるためです。
-            利益1.5万円/個の商品なら5品目、7,500円/個なら10品目で月30万円に到達します
+            1商品あたり月4個（週1回の仕入れ日に1個ずつ）が上限の想定。Yahoo!ストアの購入制限とポイント付与上限があるためです
           </p>
+          {ranked.length > 0 && (
+            <div className="mt-3 bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-xs text-gray-700 space-y-1">
+              <p>
+                利益が出る候補 <b>{ranked.length}件</b>／1商品あたりの平均は月 <b>¥{avgPerItem.toLocaleString()}</b>
+              </p>
+              {reachable ? (
+                <p className="text-green-700">
+                  ✅ 上位 <b>{itemsNeeded}品目</b> を回せば月30万円に到達します
+                </p>
+              ) : (
+                <p className="text-orange-700">
+                  ⚠️ 現在の候補を<b>全{ranked.length}品目</b>回しても月¥{totalExpected.toLocaleString()}止まりです。
+                  月30万円には <b>あと約¥{(MONTHLY_GOAL - totalExpected).toLocaleString()}</b> 不足しています
+                </p>
+              )}
+              <p className="text-gray-500">
+                ※ 月4個の制限が効いています。同じ商品を月8個仕入れられれば必要品目数は半分になります
+              </p>
+            </div>
+          )}
         </div>
 
         {/* 本日の還元と狙い目日 */}
