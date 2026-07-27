@@ -49,6 +49,28 @@ export async function deleteDeal(id: string) {
   return res.json();
 }
 
+export async function getHistoryAnalysis() {
+  const res = await fetch(`${BASE_URL}/api/deals/analysis`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`${res.status}`);
+  return res.json();
+}
+
+export async function downloadHistoryCsv() {
+  const res = await fetch(`${BASE_URL}/api/deals/export`, { headers: authHeaders() });
+  if (!res.ok) throw new Error(`${res.status}`);
+  const blob = await res.blob();
+  const d = res.headers.get("Content-Disposition") || "";
+  const m = d.match(/filename="(.+?)"/);
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = m ? m[1] : "harvest_history.csv";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 export async function getSettings() {
   const res = await fetch(`${BASE_URL}/api/settings/`, { headers: authHeaders() });
   if (!res.ok) throw new Error("取得失敗");
