@@ -201,13 +201,14 @@ export default function SourcingPage() {
         {campaign && (
           <div className="bg-white rounded-xl border border-gray-200 p-5 shadow-sm">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="text-sm text-gray-500">本日の還元</span>
+              <span className="text-sm text-gray-500">本日の還元（標準的な店の場合）</span>
               <span className="text-xl font-bold text-red-500">+{campaign.today.rate}%</span>
               <span className="text-sm text-gray-600">{campaign.today.summary}</span>
-              {campaign.today.cap > 0 && (
-                <span className="text-xs text-gray-400">（付与上限 ¥{campaign.today.cap.toLocaleString()}）</span>
-              )}
             </div>
+            <p className="text-xs text-gray-500 mt-1.5">
+              ストア独自ポイントは店舗によって大きく異なります（一般的な店は7%前後、倍倍ストア対象店は15%超）。
+              商品ごとにYahoo!から実際の付与率を取得できた場合はその値を使い、取れない場合のみ7%と仮定しています
+            </p>
             {campaign.upcoming.length > 0 && (
               <div className="mt-3 pt-3 border-t border-gray-100">
                 <p className="text-xs text-gray-500 mb-2">今後の仕入れ狙い目日（還元率順）</p>
