@@ -35,6 +35,7 @@ type Candidate = {
   yahoo_url: string; yahoo_store: string;
   profit_amount: number; profit_rate: number;
   expected_monthly_profit: number; student_monthly_profit: number;
+  monthly_units: number; cart_units: number;
   updated_at: string;
 };
 
@@ -384,7 +385,9 @@ export default function SourcingPage() {
                       {(c.expected_monthly_profit || 0) > 0 && (
                         <span className="text-xs font-bold text-blue-600">
                           月¥{c.expected_monthly_profit.toLocaleString()}
-                          <span className="font-normal text-gray-400">（月4個）</span>
+                          <span className="font-normal text-gray-400">
+                            （{c.profit_amount.toLocaleString()}円 × {c.monthly_units ?? 4}個）
+                          </span>
                         </span>
                       )}
                     </div>
