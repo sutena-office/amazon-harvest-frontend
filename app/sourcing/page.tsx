@@ -9,6 +9,12 @@ import {
 type RescanStatus = {
   status: string; checked?: number; total?: number;
   new_finds?: number; error?: string | null; finished_at?: string;
+  scenario?: string;
+};
+
+const SCENARIO_LABEL: Record<string, string> = {
+  auto: "実行日の日付から自動判定", normal: "通常日", sunday: "日曜",
+  five_day: "5のつく日", five_sun: "5のつく日＋日曜", matsuri: "超PayPay祭",
 };
 
 type Campaign = {
@@ -240,9 +246,13 @@ export default function SourcingPage() {
           </div>
         )}
         {rescanStatus && rescanStatus.status === "done" && (
-          <div className="bg-gray-50 border border-gray-200 text-gray-600 text-xs px-4 py-2 rounded-lg">
-            ✅ 前回の再チェック: {rescanStatus.checked}/{rescanStatus.total}件を更新
-            （新たに利益が出た商品 {rescanStatus.new_finds}件）
+          <div className="bg-green-50 border border-green-200 text-green-800 text-xs px-4 py-2.5 rounded-lg">
+            ✅ 下の数値は <b>「{SCENARIO_LABEL[rescanStatus.scenario || "auto"] || rescanStatus.scenario}」</b>の条件で計算されています
+            <span className="text-green-600">
+              （{rescanStatus.finished_at
+                ? new Date(rescanStatus.finished_at).toLocaleString("ja-JP", { month: "numeric", day: "numeric", weekday: "short", hour: "2-digit", minute: "2-digit" })
+                : ""}時点・{rescanStatus.checked}/{rescanStatus.total}件を更新／新たに利益が出た商品 {rescanStatus.new_finds}件）
+            </span>
           </div>
         )}
 
